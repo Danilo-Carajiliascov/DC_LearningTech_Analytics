@@ -1,0 +1,404 @@
+---
+title: "<b>Analytics</b>"
+author: "DaniloVC"
+date: "`r Sys.Date()`"
+output: 
+    html_document:
+        css: "C:/Users/danil/OneDrive/Danilo_Back-up/Projetos_Pessoais/Canal_Youtube/Canal_DC_Learning_Tech/Analytics/style.css"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Bibliotecas {#sec-bibliotecas}
+
+```{r}
+library(tidyverse)
+library(stringi)
+library(lubridate)
+library(readxl)
+library(datasets)
+library(ipeadatar)
+```
+
+## Banco de Dados
+
+#### CARS
+
+```{r}
+CARS = read.csv("C:/Users/danil/OneDrive/Danilo_Back-up/Kaggle/CARS_1.csv") |> tibble()
+CARS
+```
+
+```{r}
+CARS |> summary()
+```
+
+#### kc_house_data {#sec-kc_house_data}
+
+```{r}
+kc_house_data = read.csv("C:/Users/danil/OneDrive/Danilo_Back-up/Kaggle/kc_house_data.csv") |> tibble()
+kc_house_data
+```
+
+#### hotel_bookings {#sec-hotel_bookings}
+
+```{r}
+hotel_bookings = read.csv("C:/Users/danil/OneDrive/Danilo_Back-up/Kaggle/hotel_bookings.csv") |> tibble()
+hotel_bookings
+```
+
+#### diamonds {#sec-diamonds}
+
+```{r}
+diamonds = read.csv("C:/Users/danil/OneDrive/Danilo_Back-up/Projetos_Pessoais/Canal_Youtube/Base_Dados/diamonds.csv") |> tibble()
+diamonds
+```
+
+#### Vendas_PBI {#sec-vendas_pbi}
+
+```{r}
+Vendas_PBI = read_xlsx( "C:/Users/danil/OneDrive/Danilo_Back-up/Projetos_Pessoais/Canal_Youtube/Base_Dados/Vendas_PBI.xlsx", sheet = "Planilha1" )
+Vendas_PBI
+```
+
+#### Ctas_Receber_DB {#sec-ctas_receber_db}
+
+```{r}
+Ctas_Receber_DB = read_xlsx( "C:/Users/danil/OneDrive/Danilo_Back-up/Projetos_Pessoais/Canal_Youtube/Base_Dados/Ctas_Receber_DB.xlsx", sheet = "Planilha1" )
+Ctas_Receber_DB
+```
+
+## Análises {#sec-análises}
+
+#### Dimensão dos Dados {#sec-dimensão-dos-dados}
+
+##### Escalar {#sec-escalar}
+
+```{r}
+nrow( distinct(CARS, car_name) )
+```
+
+```{r}
+CARS |> 
+    distinct(car_name) |> 
+    nrow()
+```
+
+```{r}
+CARS$car_name[1]
+```
+
+```{r}
+select(CARS, car_name) |> head(1) |> first()
+```
+
+##### Vetor {#sec-vetor}
+
+```{r}
+c(1,2,3)
+```
+
+```{r}
+CARS$fuel_tank_capacity |>
+    unique() |>
+    sort()
+```
+
+```{r}
+CARS$car_name[1:20]
+```
+
+```{r}
+names(CARS)
+```
+
+##### Tabela {#sec-tabela}
+
+```{r}
+CARS
+```
+
+```{r}
+CARS |> 
+    filter( car_name %in% c("Mahindra Bolero Neo","Toyota Glanza","Porsche Cayenne Coupe","BMW 3 Series Gran Limousine") )
+```
+
+```{r}
+CARS[ 1:3, 1:2 ]
+```
+
+```{r}
+data.frame(
+    car_name           = CARS$car_name[1:5],
+    fuel_tank_capacity = CARS$fuel_tank_capacity[1:5]
+)
+```
+
+```{r}
+tibble(
+    car_name           = CARS$car_name[1:5],
+    fuel_tank_capacity = CARS$fuel_tank_capacity[1:5]
+)
+```
+
+```{r}
+CARS |>
+    select( car_name, fuel_type, no_cylinder ) |>  # Filtro de Colunas
+    filter( no_cylinder > 10 )                     # Filtro de Linhas
+```
+
+## Tipo de Dados
+
+#### Números
+
+```{r}
+str_c( 1, " -> ", typeof( 1 ) )
+str_c( 1.0, " -> ", typeof( 1.0 ) )
+```
+
+```{r}
+typeof( as.integer( c(1,   2,   3) ) )
+```
+
+```{r}
+str_c( as.integer( c(1,   2,   3) ), typeof( as.integer( c(1,   2,   3) ) ) )
+str_c( c(1.0, 2.0, 3.0), " -> ", typeof( c(1.0, 2.0, 3.0) ) )
+```
+
+```{r}
+tibble(
+    Numero = as.integer(1)
+)
+```
+
+```{r}
+as.POSIXct("2016-01-01 00:00:00", tz="UTC")
+as.POSIXct("2016-01-01 00:00:00", format="%Y-%m-%d %H:%M:%S", tz="UTC")
+as.POSIXct("17:23:54", format="%H:%M:%S", tz="UTC")
+```
+
+```{r}
+as.numeric( as.POSIXct("1900-01-01 00:00:00", tz="UTC") )
+as.numeric( as.POSIXct("1970-01-01 00:00:00", tz="UTC") )
+as.numeric( as.POSIXct("1970-12-31 23:59:59", tz="UTC") )
+as.numeric( as.POSIXct("2022-11-20 00:00:00", tz="UTC") )
+as.numeric( as.POSIXct("2022-11-20 00:00:00", format="%Y-%m-%d %H:%M:%S", tz="UTC") )
+as.numeric( as.POSIXct("17:23:54", format="%H:%M:%S", tz="UTC") )
+```
+
+```{r}
+as.POSIXct("2015-01-01", tz="UTC") == as_date("2015-01-01")
+```
+
+```{r}
+as.numeric( as.POSIXct("2015-01-01", tz="UTC") ) == as.numeric( as_date("2015-01-01") )
+```
+
+```{r}
+# "" + 1
+```
+
+```{r}
+NA_integer_ + 1 
+```
+
+```{r}
+str_c( date("2023-01-01"), 1 )
+```
+
+```{r}
+date("2023-01-01") + TRUE
+```
+
+```{r}
+str_c( as.numeric( date("2023-01-01") ), "casa" )
+```
+
+```{r}
+as_date( 19358 )
+as_datetime( 1672531201 )
+```
+
+```{r}
+as_datetime( 19358.55 )
+```
+
+```{r}
+DF_NA = tibble(
+    NA_character = NA_character_,
+    NA_Date      = NA_Date_,
+    NA_integer   = NA_integer_,
+    NA_real      = NA_real_,
+    `NA`         = NA
+)
+DF_NA
+```
+
+```{r}
+tibble(
+    Teste1 = c( 1, 2, 3, NA_character_ ),
+    Teste2 = c( 1, 2, 3, NA_Date_      ),
+    Teste3 = c( 1, 2, 3, NA            ),
+    Teste4 = c( 1, 2, 3, NA_real_      ),
+    Teste5 = c( 1, 2, 3, NA_integer_   )
+)
+```
+
+```{r}
+tibble(
+    Teste1 = c( "banana", "maça", "pêssego", NA_character_ ),
+    Teste2 = c( "banana", "maça", "pêssego", NA_Date_      ),
+    Teste3 = c( "banana", "maça", "pêssego", NA            ),
+    Teste4 = c( "banana", "maça", "pêssego", NA_real_      ),
+    Teste5 = c( "banana", "maça", "pêssego", NA_integer_   )
+)
+```
+
+```{r}
+c(1, 2, 3, NA_integer_) == c(1, 2, 3, 4)
+```
+
+```{r}
+tibble(
+    numero       = c(1, 2, 3, 4),
+    numero_vazio = c(1, 2, 3, NA_integer_),
+    
+    Teste_igual            = numero == numero_vazio,
+    Teste_exatamente_igual = 
+        for (i in numero) {
+            teste = c()
+            teste = append(
+                teste,
+                identical( numero[i], numero_vazio[i] )
+            )
+            teste
+        }
+)
+```
+
+```{r}
+c(1, 2, 3, 4) == c(1, 2, 3, NA_integer_)
+```
+
+```{r}
+identical(NA_integer_, 1)
+```
+
+```{r}
+teste = c()
+numero       = c(1, 2, 3, 4)
+numero_vazio = c(1, 2, 3, NA_integer_)
+
+for (i in numero) {
+    teste = append(
+        teste,
+        identical( numero[i], numero_vazio[i] )
+    )
+}
+teste
+```
+
+## Enviar para PostgreSQL
+
+##### CARS, kc_house, hotel_bookings, diamonds, Vendas_PBI, Ctas_Receber_DB
+
+```{r eval=FALSE, include=FALSE}
+library(DBI)
+library(RPostgreSQL)
+library(RPostgres)
+library(dbplyr)
+library(dplyr)
+
+CARS            = read.csv("C:/Users/danil/OneDrive/Danilo_Back-up/Kaggle/CARS_1.csv")
+kc_house        = read.csv("C:/Users/danil/OneDrive/Danilo_Back-up/Kaggle/kc_house_data.csv")
+hotel_bookings  = read.csv("C:/Users/danil/OneDrive/Danilo_Back-up/Kaggle/hotel_bookings.csv")
+diamonds        = read.csv("C:/Users/danil/OneDrive/Danilo_Back-up/Projetos_Pessoais/Canal_Youtube/Base_Dados/diamonds.csv")
+Vendas_PBI      = read_xlsx("C:/Users/danil/OneDrive/Danilo_Back-up/Projetos_Pessoais/Canal_Youtube/Base_Dados/Vendas_PBI.xlsx",      sheet = "Planilha1")
+Ctas_Receber_DB = read_xlsx("C:/Users/danil/OneDrive/Danilo_Back-up/Projetos_Pessoais/Canal_Youtube/Base_Dados/Ctas_Receber_DB.xlsx", sheet = "Planilha1")
+
+con = dbConnect(
+    RPostgres::Postgres(),
+    dbname   = 'Analytics',
+    host     = 'localhost',
+    port     = '5432',
+    user     = 'postgres',
+    password = "teste123"
+)
+
+dbWriteTable( con, "CARS",           CARS,            overwrite = TRUE )
+dbWriteTable( con, "kc_house",       kc_house,        overwrite = TRUE )
+dbWriteTable( con, "hotel_bookings", hotel_bookings,  overwrite = TRUE )
+dbWriteTable( con, "diamonds",       diamonds,        overwrite = TRUE )
+dbWriteTable( con, "Vendas_PBI",     Vendas_PBI,      overwrite = TRUE )
+dbWriteTable( con, "Ctas_Receber_DB",Ctas_Receber_DB, overwrite = TRUE )
+
+
+conn          = src_memdb()
+conn_isolated = conn$con
+
+
+copy_to(conn, CARS,            overwrite = TRUE )
+copy_to(conn, kc_house,        overwrite = TRUE )
+copy_to(conn, hotel_bookings,  overwrite = TRUE )
+copy_to(conn, diamonds,        overwrite = TRUE )
+copy_to(conn, Vendas_PBI,      overwrite = TRUE )
+copy_to(conn, Ctas_Receber_DB, overwrite = TRUE )
+
+remove(CARS, kc_house, hotel_bookings, diamonds, Vendas_PBI, Ctas_Receber_DB)
+```
+
+##### Brasilian_Ecommerce_Olist
+
+```{r eval=FALSE, include=FALSE}
+library(DBI)
+library(RPostgreSQL)
+library(RPostgres)
+library(dbplyr)
+library(dplyr)
+
+product_category_name_translation = read.csv("C:/Users/danil/OneDrive/Danilo_Back-up/Kaggle/Brasilian_Ecommerce_Olist/product_category_name_translation.csv")
+sellers        = read.csv("C:/Users/danil/OneDrive/Danilo_Back-up/Kaggle/Brasilian_Ecommerce_Olist/olist_sellers_dataset.csv")
+products       = read.csv("C:/Users/danil/OneDrive/Danilo_Back-up/Kaggle/Brasilian_Ecommerce_Olist/olist_products_dataset.csv")
+orders         = read.csv("C:/Users/danil/OneDrive/Danilo_Back-up/Kaggle/Brasilian_Ecommerce_Olist/olist_orders_dataset.csv")
+order_reviews  = read.csv("C:/Users/danil/OneDrive/Danilo_Back-up/Kaggle/Brasilian_Ecommerce_Olist/olist_order_reviews_dataset.csv")
+order_payments = read.csv("C:/Users/danil/OneDrive/Danilo_Back-up/Kaggle/Brasilian_Ecommerce_Olist/olist_order_payments_dataset.csv")
+order_items    = read.csv("C:/Users/danil/OneDrive/Danilo_Back-up/Kaggle/Brasilian_Ecommerce_Olist/olist_order_items_dataset.csv")
+geolocation    = read.csv("C:/Users/danil/OneDrive/Danilo_Back-up/Kaggle/Brasilian_Ecommerce_Olist/olist_geolocation_dataset.csv")
+customers      = read.csv("C:/Users/danil/OneDrive/Danilo_Back-up/Kaggle/Brasilian_Ecommerce_Olist/olist_customers_dataset.csv")
+
+con = dbConnect(
+    RPostgres::Postgres(),
+    dbname   = 'Brasilian_Ecommerce_Olist',
+    host     = 'localhost',
+    port     = '5432',
+    user     = 'postgres',
+    password = "teste123"
+)
+
+dbWriteTable( con, "product_category_name_translation", product_category_name_translation, overwrite = TRUE )
+dbWriteTable( con, "sellers",       sellers,        overwrite = TRUE )
+dbWriteTable( con, "products",      products,       overwrite = TRUE )
+dbWriteTable( con, "orders",        orders,         overwrite = TRUE )
+dbWriteTable( con, "order_reviews", order_reviews,  overwrite = TRUE )
+dbWriteTable( con, "order_payments",order_payments, overwrite = TRUE )
+dbWriteTable( con, "order_items",   order_items,    overwrite = TRUE )
+dbWriteTable( con, "geolocation",   geolocation,    overwrite = TRUE )
+dbWriteTable( con, "customers",     customers,      overwrite = TRUE )
+
+conn          = src_memdb()
+conn_isolated = conn$con
+
+copy_to(conn, product_category_name_translation, overwrite = TRUE )
+copy_to(conn, sellers,        overwrite = TRUE )
+copy_to(conn, products,       overwrite = TRUE )
+copy_to(conn, orders,         overwrite = TRUE )
+copy_to(conn, order_reviews,  overwrite = TRUE )
+copy_to(conn, order_payments, overwrite = TRUE )
+copy_to(conn, order_items,    overwrite = TRUE )
+copy_to(conn, geolocation,    overwrite = TRUE )
+copy_to(conn, customers,      overwrite = TRUE )
+
+remove(product_category_name_translation, sellers, products, orders, order_reviews, order_payments, products, order_items, geolocation, customers)
+```
